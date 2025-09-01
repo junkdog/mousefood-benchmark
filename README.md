@@ -15,7 +15,7 @@ Originally forked from [mousefood-esp32-demo](https://github.com/j-g00da/mousefo
 ## Hardware
 
 - **Board**: Waveshare ESP32-S3-LCD-1.69
-- **Display**: ST7789 (240x280, 90° rotation)
+- **Display**: ST7789 (240x320~~280~~, 90° rotation)
 - **Controls**: GPIO0 button for scene transitions
 - **Monitoring**: ADC battery voltage on GPIO1
 
