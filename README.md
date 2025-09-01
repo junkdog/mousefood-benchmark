@@ -10,14 +10,7 @@ Originally forked from [mousefood-esp32-demo](https://github.com/j-g00da/mousefo
 - Gauge widget benchmarks  
 - System statistics display
 - Real-time frame rate calculations
-- Hardware integration (SPI display, button controls, battery monitoring)
-
-## Hardware
-
-- **Board**: Waveshare ESP32-S3-LCD-1.69
-- **Display**: ST7789 (240x320~~280~~, 90° rotation)
-- **Controls**: GPIO0 button for scene transitions
-- **Monitoring**: ADC battery voltage on GPIO1
+- Tachyonfx effects
 
 ## Quick Start
 
@@ -28,5 +21,3 @@ Originally forked from [mousefood-esp32-demo](https://github.com/j-g00da/mousefo
 # Build only
 MCU=esp32s3 cargo build --target xtensa-esp32s3-espidf --release
 ```
-
-See `CLAUDE.md` for detailed build and deployment instructions.
