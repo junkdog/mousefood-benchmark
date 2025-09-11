@@ -17,10 +17,12 @@ use ratatui::layout::{Margin, Size};
 use crate::catpuccin::CATPPUCCIN;
 use crate::fps::FpsWidget;
 use crate::header::render_header;
+use crate::worm_buffer::WormBuffer;
 
 #[derive(Debug)]
 pub struct Stats<B: Backend> {
     fps_widget: FpsWidget,
+    worm_buffer: WormBuffer,
     _marker: PhantomData<B>,
 }
 
@@ -28,6 +30,7 @@ impl<B: Backend> Stats<B> {
     pub fn new() -> Self {
         Self {
             fps_widget: FpsWidget::new().with_label(true).with_style(CATPPUCCIN.green),
+            worm_buffer: WormBuffer::new(),
             _marker: PhantomData,
         }
     }
@@ -59,15 +62,18 @@ impl<B: Backend> Default for Stats<B> {
 impl<B: Backend> Widget for &Stats<B> {
     #[allow(clippy::similar_names)]
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let layout = Layout::vertical([
-            Constraint::Length(3),
-            Constraint::Min(1),
-            Constraint::Length(3),
-        ]).split(area);
+        self.worm_buffer.cached_render(area, buf, |buf| {
+            let layout = Layout::vertical([
+                Constraint::Length(3),
+                Constraint::Min(1),
+                Constraint::Length(3),
+            ]).split(area);
 
-        self.render_header(layout[0], buf);
-        self.render_content(layout[1], buf);
-        self.render_footer(layout[2], buf);
+            self.render_header(layout[0], buf);
+            self.render_content(layout[1], buf);
+        });
+
+        self.render_footer(Rect::new(6, 23, 53 - 6, 1), buf);
     }
 }
 
@@ -92,7 +98,9 @@ impl<B: Backend> Stats<B> {
         let used_memory = total_memory - free_memory;
         let memory_usage = format!("Memory: {}KB used / {}KB total", used_memory / 1024, total_memory / 1024);
         let free_memory_str = format!("Free: {}KB", free_memory / 1024);
-        
+
+        let screen_area = buf.area;
+
         let content = vec![
             Line::from(vec![
                 Span::styled("System Status", Style::default().fg(CATPPUCCIN.yellow).bold()),
@@ -101,7 +109,7 @@ impl<B: Backend> Stats<B> {
             Line::from(vec![
                 Span::styled("• ", Style::default().fg(CATPPUCCIN.green)),
                 Span::styled("Terminal: ", Style::default().fg(CATPPUCCIN.blue).bold()),
-                Span::styled(format_compact!("{}x{}", area.width, area.height), Style::default().fg(CATPPUCCIN.text)),
+                Span::styled(format_compact!("{}x{}", screen_area.width, screen_area.height), Style::default().fg(CATPPUCCIN.text)),
             ]),
             Line::from(vec![
                 Span::styled("• ", Style::default().fg(CATPPUCCIN.green)),

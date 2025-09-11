@@ -18,11 +18,13 @@ use ratatui::layout::Margin;
 use std::marker::PhantomData;
 use tachyonfx::Motion::{LeftToRight, RightToLeft, UpToDown};
 use tachyonfx::{fx, CellFilter, ColorSpace, Duration, EffectManager, Interpolation, Motion, ToRgbComponents};
+use crate::worm_buffer::WormBuffer;
 
 pub struct Nonsense<B: Backend> {
     fps_widget: FpsWidget,
     effects: EffectManager<()>,
     content: Paragraph<'static>,
+    worm_buffer: WormBuffer,
     _marker: PhantomData<B>,
 }
 
@@ -94,6 +96,7 @@ impl<B: Backend> Nonsense<B> {
             fps_widget: FpsWidget::new().with_label(true).with_style(CATPPUCCIN.green),
             effects: EffectManager::default(),
             content: paragraph,
+            worm_buffer: WormBuffer::new(),
             _marker: PhantomData,
         };
 
@@ -148,15 +151,19 @@ impl<B: Backend> Nonsense<B> {
                 ]),
 
                 fx::prolong_start(300, fx::parallel(&[
-                    fx::sweep_in(LeftToRight, 20, 0, Color::Black, 1000),
+                    fx::sweep_in(LeftToRight, 20, 0, Color::Black, 1000)
+                        .with_color_space(ColorSpace::Rgb),
                     fx::prolong_start(1800,
-                        fx::hsl_shift(Some([0.0, -100.0, -25.0]), None, (600, Linear)).reversed()
+                        fx::hsl_shift(Some([0.0, -100.0, -25.0]), None, (600, Linear))
+                            .with_filter(CellFilter::Text.into_static())
+                            .reversed()
                     )
                 ])),
 
                 fx::sleep(1000),
                 fx::parallel(&[
-                    fx::hsl_shift(Some([60.0, 10.0, 5.0]), None, 2500),
+                    fx::hsl_shift(Some([60.0, 10.0, 5.0]), None, 2500)
+                        .with_filter(CellFilter::Text.into_static()),
                     fx::prolong_start(1900, fx::dissolve((600, ExpoOut)))
                 ]),
             ])).with_area(area)
@@ -207,15 +214,17 @@ impl<B: Backend> Default for Nonsense<B> {
 impl<B: Backend> Widget for &Nonsense<B> {
     #[allow(clippy::similar_names)]
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let layout = Layout::vertical([
-            Constraint::Length(3),
-            Constraint::Min(1),
-            Constraint::Length(3),
-        ]).split(area);
+        self.worm_buffer.cached_render(area, buf, |buf| {
+            let layout = Layout::vertical([
+                Constraint::Length(3),
+                Constraint::Min(1),
+            ]).split(area);
 
-        self.render_header(layout[0], buf);
-        self.render_content(layout[1], buf);
-        self.render_footer(layout[2], buf);
+            self.render_header(layout[0], buf);
+            self.render_content(layout[1], buf);
+        });
+
+        self.render_footer(Rect::new(6, 23, 53 - 6, 1), buf);
     }
 }
 

@@ -20,6 +20,7 @@ use ratatui::text::Text;
 use crate::catpuccin::CATPPUCCIN;
 use crate::fps::FpsWidget;
 use crate::header::render_header;
+use crate::worm_buffer::WormBuffer;
 
 const ITERATIONS: u32 = 100_000;
 
@@ -53,6 +54,7 @@ pub struct GlyphMappingApp<'a, B: Backend> {
     results: BenchmarkResults,
     current_benchmark: usize,
     fps_widget: FpsWidget,
+    worm_buffer: WormBuffer,
     _marker: PhantomData<B>,
 }
 
@@ -64,6 +66,7 @@ impl<'a, B: Backend> GlyphMappingApp<'a, B> {
             current_benchmark: 0,
             fps_widget: FpsWidget::new().with_label(true).with_style(CATPPUCCIN.green),
             _marker: PhantomData,
+            worm_buffer: WormBuffer::new(),
         }
     }
 
@@ -111,6 +114,7 @@ impl<'a, B: Backend> GlyphMappingApp<'a, B> {
         };
 
         self.current_benchmark += 1;
+        self.worm_buffer.reset();
     }
 
     fn benchmark_ascii(&self, font: &MonoFont) -> u32 {
@@ -223,8 +227,6 @@ impl<'a, B: Backend> GlyphMappingApp<'a, B> {
             self.fps_widget.fps.tick();
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))
                 .unwrap();
-            
-            thread::sleep(Duration::from_millis(16)); // ~60 FPS
         }
     }
 }
@@ -232,15 +234,18 @@ impl<'a, B: Backend> GlyphMappingApp<'a, B> {
 
 impl<'a, B: Backend> Widget for &GlyphMappingApp<'a, B> {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let layout = Layout::vertical([
-            Constraint::Length(3),
-            Constraint::Percentage(100),
-            Constraint::Length(3),
-        ]).split(area);
+        self.worm_buffer.cached_render(area, buf, |buf| {
+            let layout = Layout::vertical([
+                Constraint::Length(3),
+                Constraint::Percentage(100),
+                Constraint::Length(3),
+            ]).split(area);
 
-        self.render_header(layout[0], buf);
-        self.render_results(layout[1], buf);
-        self.render_footer(layout[2], buf);
+            self.render_header(layout[0], buf);
+            self.render_results(layout[1], buf);
+            // self.render_footer(layout[2], buf);
+        });
+        self.render_footer(Rect::new(6, 23, 53 - 6, 1), buf);
     }
 }
 

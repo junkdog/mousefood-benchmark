@@ -11,6 +11,7 @@ mod glyph_mapping;
 mod string_ops;
 mod embedded_str;
 mod header;
+mod worm_buffer;
 
 use crate::gauge::GaugeApp;
 use crate::benchmark::Benchmark;
@@ -38,9 +39,7 @@ use std::thread;
 use std::time::Duration;
 use embedded_graphics::prelude::{DrawTarget, Point, Size};
 use embedded_graphics::primitives::Rectangle;
-use embedded_graphics_unicodefonts::atlas::FontAtlas;
-use embedded_graphics_unicodefonts::{mono_6x10_atlas, mono_6x13_bold_atlas, MONO_6X10};
-use esp_idf_svc::sys::register_t;
+use embedded_graphics_unicodefonts::{mono_6x10_atlas, mono_6x10_optimized_atlas, mono_6x13_bold_atlas};
 use ratatui::Terminal;
 use ratatui::layout::Layout;
 use crate::stats::Stats;
@@ -122,7 +121,7 @@ fn main() {
 
     // Setup Mousefood and Ratatui
     let mut config = EmbeddedBackendConfig::default();
-    config.font_regular = mono_6x10_atlas();
+    config.font_regular = mono_6x10_optimized_atlas();
     config.font_bold = Some(mono_6x13_bold_atlas());
 
     display.fill_solid(
@@ -155,7 +154,7 @@ fn main() {
 
         thread::sleep(Duration::from_millis(200));
 
-        GlyphMappingApp::new(&mono_6x10_atlas())
+        GlyphMappingApp::new(&mono_6x10_optimized_atlas())
             .run(&mut terminal, &mut notification, &mut button)
             .unwrap();
 

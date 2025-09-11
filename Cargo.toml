@@ -28,12 +28,14 @@ experimental = ["esp-idf-svc/experimental"]
 esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
 mipidsi = "0.9.0"
 compact_str = { version = "0.9.0", default-features = false }
-#mousefood = { path = "../mousefood/mousefood", default-features = false, features = ["fonts"] }
-mousefood = { git = "https://github.com/j-g00da/mousefood", default-features = false, package = "mousefood" }
+mousefood = { path = "../mousefood/mousefood", default-features = false }
+#mousefood = { version = "0.2.1" }
 ratatui = { version = "0.30.0-alpha.5", default-features = false, features = ["layout-cache"] }
 tachyonfx = { git = "https://github.com/junkdog/tachyonfx", branch = "ratatui-0.30-preview", default-features = false }
 embedded-graphics = "0.8.1"
-embedded-graphics-unicodefonts = { git = "https://github.com/junkdog/embedded-graphics-unicodefonts", branch = "atlas" }
+#embedded-graphics-unicodefonts = { git = "https://github.com/junkdog/embedded-graphics-unicodefonts", branch = "atlas" }
+embedded-graphics-unicodefonts = "0.2.0"
+foldhash = { version = "0.2.0", default-features = false }
 
 [build-dependencies]
 embuild = "0.33"
